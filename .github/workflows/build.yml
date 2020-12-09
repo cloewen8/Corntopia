@@ -35,6 +35,7 @@ jobs:
           create_annotated_tag: true
       - name: Create a GitHub release (test)
         uses: actions/create-release@v1
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
