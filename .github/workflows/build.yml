@@ -39,9 +39,9 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
-      - name: Create a GitHub release
+      - name: Tag release
         if: ${{ runner.os == 'Linux' && matrix.java == '11' }}
-        uses: actions/create-release@v5
+        uses: mathieudutour/github-tag-action@v5.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
