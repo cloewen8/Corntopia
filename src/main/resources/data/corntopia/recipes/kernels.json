@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "corntopia:corn"
+    }
+  ],
+  "result": {
+    "item": "corntopia:corn_stalk"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "corntopia:block/corn_stalk_bottom"
+    },
+    "half=upper": {
+      "model": "corntopia:block/corn_stalk_top"
+    }
+  }
+}

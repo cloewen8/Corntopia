@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/cross",
+    "textures": {
+    	"particle": "corntopia:item/corn",
+        "cross": "corntopia:block/corn_stalk_top"
+    }
+}

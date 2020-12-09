@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "corntopia:block/corn_stalk_bottom"
+  }
+}

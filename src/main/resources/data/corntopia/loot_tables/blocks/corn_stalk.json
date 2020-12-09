@@ -1,0 +1,46 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+              {
+                  "function": "minecraft:set_count",
+                  "count": {
+                      "min": 1.0,
+                      "max": 4.0,
+                      "type": "minecraft:uniform"
+                  }
+              },
+              {
+                  "function": "minecraft:apply_bonus",
+                  "enchantment": "minecraft:fortune",
+                  "formula": "minecraft:uniform_bonus_count",
+                  "parameters": {
+                    "bonusMultiplier": 1
+                  }
+              }
+          ],
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "corntopia:corn_stalk",
+              "properties": {
+                "half": "lower"
+              }
+            }
+          ],
+          "name": "corntopia:corn"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}
