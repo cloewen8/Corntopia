@@ -39,3 +39,9 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
+      - name: Create a GitHub release
+        uses: actions/create-release@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          create_annotated_tag: true
