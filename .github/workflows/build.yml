@@ -39,9 +39,9 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
-      - name: Tag release
+      - name: Bump version and push tag
+        id: tag_version
         if: ${{ runner.os == 'Linux' && matrix.java == '11' }}
         uses: mathieudutour/github-tag-action@v5.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          create_annotated_tag: true
