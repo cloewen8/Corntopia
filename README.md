@@ -23,9 +23,13 @@ Corntopia is designed using Fabric and can be installed like any other Fabric mo
 ## Features (spoilers)
 - **Corn** - An edible item, comparable to Sweet Berries.
   - Can be crafted into Corn Stalk (kernels).
+
+![Preview of Cthe Corn item](preview/corn.png)
 - **Corn Stalk** - A 2 tall sunflower-life block.
   - Drops corn when broken (even more with Fortune).
   - It burns incredibly easily (easier then any other vanilla block).
+
+![Preview of the Corn Stalk block](preview/corn_stalk.png)
 - **Corn Field** - A flat yellowish-orange biome that is overgrown with corn!
 
 ![Preview of Corn Field](preview/corn_field.png)
