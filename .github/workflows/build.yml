@@ -37,13 +37,20 @@ jobs:
         run: ./gradlew build
       # Release
       - name: Read mod version
-        id: modver
+        id: mod_version
         # Only Release builds from LTS Java on one OS when pushing
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         uses: christian-draeger/read-properties@1.0.1
         with:
           path: './gradle.properties'
           property: 'mod_version'
+      - name: Read Minecraft version
+        id: minecraft_version
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
+        uses: christian-draeger/read-properties@1.0.1
+        with:
+          path: './gradle.properties'
+          property: 'minecraft_version'
       - name: Bump version and push tag
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         uses: anothrNick/github-tag-action@1.26.0
@@ -51,7 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
-          INITIAL_VERSION: ${{ steps.modver.outputs.value }}
+          INITIAL_VERSION: ${{ steps.mod_version.outputs.value }}
           DEFAULT_BUMP: patch
       - name: Create release
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
@@ -62,6 +69,7 @@ jobs:
         with:
           tag_name: ${{ steps.tags.outputs.new_tag }}
           release_name: Corntopia ${{ steps.tags.outputs.new_tag }} (alpha)
+          body: \*\*For Minecraft ${{ steps.minecraft_version.outputs.value }}\*\*
           draft: true
           prerelease: true
       - name: Attach artifacts
@@ -71,6 +79,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.releases.outputs.upload_url }}
-          asset_path: ./build/libs/corntopia-${{ steps.modver.outputs.value }}-dev.jar
+          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}-dev.jar
           asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
           asset_content_type: application/java-archive
