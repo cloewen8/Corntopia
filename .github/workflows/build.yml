@@ -69,7 +69,7 @@ jobs:
         with:
           tag_name: ${{ steps.tags.outputs.new_tag }}
           release_name: Corntopia ${{ steps.tags.outputs.new_tag }} (alpha)
-          body: **For Minecraft ${{ steps.minecraft_version.outputs.value }}**
+          body: '**For Minecraft ${{ steps.minecraft_version.outputs.value }}**'
           draft: true
           prerelease: true
       - name: Attach artifacts
