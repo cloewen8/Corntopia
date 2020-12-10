@@ -71,3 +71,6 @@ jobs:
         uses: actions/upload-release-asset@v1.0.2
         with:
           upload_url: ${{ steps.releases.outputs.upload_url }}
+          asset_path: ./build/libs/corntopia-${{ steps.modver.outputs.value }}-dev.jar
+          asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
+          asset_content_type: application/java-archive
