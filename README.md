@@ -28,6 +28,8 @@ Corntopia is designed using Fabric and can be installed like any other Fabric mo
   - It burns incredibly easily (easier then any other vanilla block).
 - **Corn Field** - A flat yellowish-orange biome that is overgrown with corn!
 
+![Preview of Corn Field](preview/corn_field.png)
+
 ## Contributing
 __Contributions welcome!__
 
