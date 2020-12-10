@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "id": "corntopia",
   "version": "${version}",
-
   "name": "Corntopia",
   "description": "Corn and corn related features!",
   "authors": [
-    "CJ"
+    "Colton Loewen"
   ],
   "contact": {
     "homepage": "https://cjloewen.ca/",
+    "issues": "https://github.com/cloewen8/Corntopia/issues/new/choose",
     "sources": "https://github.com/cloewen8/Corntopia"
   },
 
-  "license": "CC0-1.0",
+  "license": "Apache-2.0",
   "icon": "assets/corntopia/icon.png",
 
   "environment": "*",
@@ -22,14 +22,10 @@
       "ca.cjloewen.corntopia.CorntopiaMod"
     ]
   },
-  "mixins": [
-  ],
 
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",
     "minecraft": "1.16.x"
-  },
-  "suggests": {
   }
 }
