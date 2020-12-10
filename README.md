@@ -18,7 +18,7 @@ Corntopia is designed using Fabric and can be installed like any other Fabric mo
    
    Try to pick a version that matches your Minecraft version. If a release for your version of Minecraft does not exist, try the newest release. If you experience any compatibility problems, please create a ticket:
    
-   https://github.com/cloewen8/Corntopia/issues/new
+   https://github.com/cloewen8/Corntopia/issues/new/choose
 
 ## Features (spoilers)
 - **Corn** - An edible item, comparable to Sweet Berries.
