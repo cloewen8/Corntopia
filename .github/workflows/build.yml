@@ -72,13 +72,23 @@ jobs:
           body: '**For Minecraft ${{ steps.minecraft_version.outputs.value }}**'
           draft: true
           prerelease: true
-      - name: Attach artifacts
+      - name: Attach release
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.releases.outputs.upload_url }}
-          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}-dev.jar
+          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}.jar
           asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
+          asset_content_type: application/java-archive
+      - name: Attach sources
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.releases.outputs.upload_url }}
+          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}-sources.jar
+          asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-sources-alpha.jar
           asset_content_type: application/java-archive
