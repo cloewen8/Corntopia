@@ -101,7 +101,7 @@ jobs:
           project_id: 427724
           game_endpoint: minecraft
           file_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}.jar
-          changelog: 'Changelog here!'
+          changelog: 'Automated release from GitHub, use at your own risk!'
           display_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
           game_versions: '${{ steps.minecraft_version.outputs.value }}'
           release_type: alpha
