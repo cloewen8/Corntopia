@@ -36,14 +36,9 @@ jobs:
       - name: Build
         run: ./gradlew build
       # Release
-      - name: Read mod version
-        id: mod_version
-        # Only Release builds from LTS Java on one OS when pushing
-        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
-        uses: christian-draeger/read-properties@1.0.1
-        with:
-          path: './gradle.properties'
-          property: 'mod_version'
+      - name: Get version
+        id: semver
+        run: ./gradlew semver
       - name: Read Minecraft version
         id: minecraft_version
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
@@ -51,15 +46,6 @@ jobs:
         with:
           path: './gradle.properties'
           property: 'minecraft_version'
-      - name: Bump version and push tag
-        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
-        uses: anothrNick/github-tag-action@1.26.0
-        id: tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          INITIAL_VERSION: ${{ steps.mod_version.outputs.value }}
-          DEFAULT_BUMP: patch
       - name: Create release
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         uses: actions/create-release@v1.1.4
@@ -67,8 +53,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tags.outputs.new_tag }}
-          release_name: Corntopia ${{ steps.tags.outputs.new_tag }} (alpha)
+          tag_name: ${{ steps.semver.outputs.value }}
+          release_name: Corntopia ${{ steps.semver.outputs.value }} (alpha)
           body: '**For Minecraft ${{ steps.minecraft_version.outputs.value }}**'
           draft: true
           prerelease: true
@@ -79,8 +65,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.releases.outputs.upload_url }}
-          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}.jar
-          asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
+          asset_path: ./build/libs/corntopia-${{ steps.semver.outputs.value }}.jar
+          asset_name: corntopia-${{ steps.semver.outputs.value }}-alpha.jar
           asset_content_type: application/java-archive
       - name: Attach sources
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
@@ -89,8 +75,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.releases.outputs.upload_url }}
-          asset_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}-sources.jar
-          asset_name: corntopia-${{ steps.tags.outputs.new_tag }}-sources-alpha.jar
+          asset_path: ./build/libs/corntopia-${{ steps.semver.outputs.value }}-sources.jar
+          asset_name: corntopia-${{ steps.semver.outputs.value }}-sources-alpha.jar
           asset_content_type: application/java-archive
       - name: Upload to CurseForge
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
@@ -100,9 +86,9 @@ jobs:
           token: ${{ secrets.CURSE_FORGE_API_TOKEN }}
           project_id: 427724
           game_endpoint: minecraft
-          file_path: ./build/libs/corntopia-${{ steps.mod_version.outputs.value }}.jar
+          file_path: ./build/libs/corntopia-${{ steps.semver.outputs.value }}.jar
           changelog: 'Automated release from GitHub, use at your own risk!'
-          display_name: corntopia-${{ steps.tags.outputs.new_tag }}-alpha.jar
+          display_name: corntopia-${{ steps.semver.outputs.value }}-alpha.jar
           game_versions: '${{ steps.minecraft_version.outputs.value }}'
           release_type: alpha
           relations: fabric-api:requiredDependency
