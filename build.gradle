@@ -30,7 +30,7 @@ class SemverTask extends DefaultTask {
 	static def getTag() {
 		String tagOutput = "git tag".execute().text;
 		println(tagOutput);
-		Scanner tagsScanner = new Scanner();
+		Scanner tagsScanner = new Scanner(tagOutput);
 		String lastTag;
 		while (tagsScanner.hasNextLine())
 			lastTag = tagsScanner.nextLine();
