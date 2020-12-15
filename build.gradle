@@ -5,9 +5,53 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+class SemverTask extends DefaultTask {
+	static String baseVersion;
+
+	@TaskAction
+	def execute() {
+		println("::set-output value=v" + project.version);
+	}
+	
+	static def calculateVersion() {
+		String lastTag = getTag();
+		if (lastTag.startsWith("v"))
+			lastTag = lastTag.substring(1);
+		int[] baseInts = toIntArray(baseVersion.split("\\."));
+		int[] tagInts = toIntArray(lastTag.split("\\."));
+		int[] lastVersion;
+		if (baseInts[0] > tagInts[0] || baseInts[1] > tagInts[1] || baseInts[2] > tagInts[2])
+			lastVersion = baseInts;
+		else
+			lastVersion = tagInts;
+		return """${lastVersion[0]}.${lastVersion[1]}.${lastVersion[2] + 1}""";
+	}
+	
+	static def getTag() {
+		Scanner tagsScanner = new Scanner("git tag".execute().text);
+		String lastTag;
+		while (tagsScanner.hasNextLine())
+			lastTag = tagsScanner.nextLine();
+		return lastTag;
+	}
+	
+	static def toIntArray(String[] strArr) {
+		int[] intArr = new int[strArr.length];
+		for (int i = 0; i < strArr.length; i++)
+			intArr[i] = strArr[i] as Integer;
+		return intArr;
+	}
+}
+
 archivesBaseName = project.archives_base_name
-version = project.mod_version
+SemverTask.baseVersion = project.mod_version
+version = SemverTask.calculateVersion()
 group = project.maven_group
+
+task semver(type: SemverTask) {
+	group = "build"
+	description = "Outputs a tag value for GitHub Actions."
+}
 
 dependencies {
 	// To change the versions see the gradle.properties file
