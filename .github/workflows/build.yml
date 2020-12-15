@@ -35,6 +35,7 @@ jobs:
       # Test
       - name: Build
         run: ./gradlew build
+        shell: bash
       # Release
       - name: Get version
         id: semver
