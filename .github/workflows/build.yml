@@ -35,13 +35,11 @@ jobs:
       # Test
       - name: Build
         run: ./gradlew build
-        shell: bash
       # Release
       - name: Get version
         id: semver
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         run: ./gradlew semver
-        shell: bash
       - name: Read Minecraft version
         id: minecraft_version
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
