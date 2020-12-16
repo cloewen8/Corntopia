@@ -42,6 +42,7 @@ jobs:
         id: semver
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         run: ./gradlew semver
+      - run: echo 'semver is ${{ steps.semver.outputs.value }}'
       - name: Read Minecraft version
         id: minecraft_version
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
