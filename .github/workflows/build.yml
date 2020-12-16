@@ -33,7 +33,8 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
       # Test
-      - run: cd
+      - if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
+        run: pwd
       - name: Build
         run: ./gradlew build
       # Release
