@@ -33,6 +33,7 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
       # Test
+      - run: git describe --tags --abbrev=0
       - name: Build
         run: ./gradlew build
       # Release
