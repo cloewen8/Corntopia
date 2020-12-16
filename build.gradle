@@ -28,7 +28,7 @@ class SemverTask extends DefaultTask {
 	}
 	
 	static def getTag() {
-		String tags = "git tag".execute().text;
+		String tags = "git tag --list".execute().text;
 		println("Tags:")
 		println(tags);
 		Scanner tagsScanner = new Scanner(tags);
