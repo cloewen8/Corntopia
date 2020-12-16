@@ -30,6 +30,8 @@ class SemverTask extends DefaultTask {
 	static def getTag() {
 		String tag = "git describe --tags --abbrev=0".execute().text;
 		print("Tag: " + tag)
+		if (tag.isEmpty())
+			throw new IllegalStateException("No tags present.");
 		return tag;
 	}
 	
