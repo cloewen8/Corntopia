@@ -49,6 +49,12 @@ jobs:
         with:
           path: './gradle.properties'
           property: 'minecraft_version'
+      - name: Add tag
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
+        uses: anothrNick/github-tag-action@1.33.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUSTOM_TAG: ${{ steps.semver.outputs.v_value }}
       - name: Create release
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         uses: actions/create-release@v1.1.4
