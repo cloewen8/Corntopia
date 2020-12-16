@@ -28,14 +28,9 @@ class SemverTask extends DefaultTask {
 	}
 	
 	static def getTag() {
-		String tags = "git tag --list".execute().text;
-		println("Tags:")
-		println(tags);
-		Scanner tagsScanner = new Scanner(tags);
-		String lastTag;
-		while (tagsScanner.hasNextLine())
-			lastTag = tagsScanner.nextLine();
-		return lastTag;
+		String tag = "git describe --tags --abbrev=0".execute().text;
+		print("Tag: " + tag)
+		return tag;
 	}
 	
 	static def toIntArray(String[] strArr) {
