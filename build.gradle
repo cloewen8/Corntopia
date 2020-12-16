@@ -10,7 +10,7 @@ class SemverTask extends DefaultTask {
 
 	@TaskAction
 	def execute() {
-		println("::set-output value=v" + project.version);
+		println("::set-output name=value::v" + project.version);
 	}
 	
 	static def calculateVersion() {
