@@ -42,7 +42,6 @@ jobs:
         id: semver
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
         run: ./gradlew semver
-      - run: echo 'semver is ${{ steps.semver.outputs.value }}'
       - name: Read Minecraft version
         id: minecraft_version
         if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '11' }}
@@ -57,8 +56,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.semver.outputs.value }}
-          release_name: Corntopia ${{ steps.semver.outputs.value }} (alpha)
+          tag_name: ${{ steps.semver.outputs.v_value }}
+          release_name: Corntopia ${{ steps.semver.outputs.v_value }} (alpha)
           body: '**For Minecraft ${{ steps.minecraft_version.outputs.value }}**'
           draft: true
           prerelease: true
