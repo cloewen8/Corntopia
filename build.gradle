@@ -14,8 +14,8 @@ class SemverTask extends DefaultTask {
 		println("::set-output name=v_value::v" + project.version);
 	}
 	
-	static def calculateVersion() {
-		String lastTag = getTag();
+	static def calculateVersion(Project project) {
+		String lastTag = getTag(project);
 		if (lastTag.startsWith("v"))
 			lastTag = lastTag.substring(1);
 		int[] baseInts = toIntArray(baseVersion.split("\\."));
@@ -28,8 +28,8 @@ class SemverTask extends DefaultTask {
 		return """${lastVersion[0]}.${lastVersion[1]}.${lastVersion[2] + 1}""";
 	}
 	
-	static def getTag() {
-		String tag = "git describe --tags --abbrev=0".execute().text;
+	static def getTag(Project project) {
+		String tag = "git describe --tags --abbrev=0".execute(null, project.projectDir).text;
 		if (tag.isEmpty())
 			throw new IllegalStateException("No tag present.");
 		return tag;
@@ -45,7 +45,7 @@ class SemverTask extends DefaultTask {
 
 archivesBaseName = project.archives_base_name
 SemverTask.baseVersion = project.mod_version
-version = SemverTask.calculateVersion()
+version = SemverTask.calculateVersion(project)
 group = project.maven_group
 
 task semver(type: SemverTask) {
