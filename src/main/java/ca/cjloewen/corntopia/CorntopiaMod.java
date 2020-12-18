@@ -13,7 +13,8 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.OverworldBiomes;
 import net.fabricmc.fabric.api.biome.v1.OverworldClimate;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap; 
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.RenderLayer;
@@ -36,6 +37,7 @@ public class CorntopiaMod implements ModInitializer {
 		FlammableBlockRegistry.getDefaultInstance().add(Blocks.CORN_STALK, new FlammableBlockRegistry.Entry(80, 100));
 		// Corn
 		Registry.register(Registry.ITEM, new Identifier(NAMESPACE, "corn"), Items.CORN);
+		CompostingChanceRegistry.INSTANCE.add(Items.CORN, 0.65F);
 		// Corn Field
 		Registry.register(BuiltinRegistries.BIOME, BiomeKeys.CORN_FIELD.getValue(), Biomes.CORN_FIELD);
 		Registry.register(Registry.FEATURE, new Identifier(NAMESPACE, "fill_horizontal"), Features.FILL_HORIZONTAL);
