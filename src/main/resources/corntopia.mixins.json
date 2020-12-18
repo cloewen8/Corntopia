@@ -3,7 +3,7 @@
   "package": "ca.cjloewen.corntopia.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-  	"CopyableItemEntityMixin",
+  	"ItemEntityMixin",
   	"server.MixinWorld"
   ],
   "injectors": {
