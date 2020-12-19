@@ -25,11 +25,10 @@ public class CornItemEntity extends ItemEntity {
 		super(EntityType.ITEM, originalEntity.world);
 		explosionX = Double.POSITIVE_INFINITY;
 		setStack(originalEntity.getStack());
-		updateTrackedPosition(originalEntity.getTrackedPosition());
 		refreshPositionAndAngles(originalEntity.getX(), originalEntity.getY(), originalEntity.getZ(), originalEntity.getYaw(1f), originalEntity.getPitch(1f));
 		setVelocity(originalEntity.getVelocity());
-		setEntityId(originalEntity.getEntityId());
 		setPickupDelay(((IItemEntityMixin)originalEntity).getPickupDelay());
+		setEntityId(originalEntity.getEntityId());
 		setUuid(originalEntity.getUuid());
 	}
 	
@@ -54,7 +53,6 @@ public class CornItemEntity extends ItemEntity {
 					popcorn = new ItemEntity(world, this.getX(), this.getY(), this.getZ(), new ItemStack(Items.POPCORN));
 					// Set the velocity if the explosion position is available.
 					if (explosionX != Double.POSITIVE_INFINITY) {
-						LOGGER.info("Explosion set, can add velocity!");
 						Vec3d explosionPos = new Vec3d(explosionX, explosionY, explosionZ);
 						// Unit vector of force direction (with 0.5 random scatter).
 						double x = popcorn.getX() + random.nextDouble() - 0.5 - explosionX;
