@@ -38,6 +38,8 @@ public class CorntopiaMod implements ModInitializer {
 		// Corn
 		Registry.register(Registry.ITEM, new Identifier(NAMESPACE, "corn"), Items.CORN);
 		CompostingChanceRegistry.INSTANCE.add(Items.CORN, 0.65F);
+		// Popcorn
+		Registry.register(Registry.ITEM, new Identifier(NAMESPACE, "popcorn"), Items.POPCORN);
 		// Corn Field
 		Registry.register(BuiltinRegistries.BIOME, BiomeKeys.CORN_FIELD.getValue(), Biomes.CORN_FIELD);
 		Registry.register(Registry.FEATURE, new Identifier(NAMESPACE, "fill_horizontal"), Features.FILL_HORIZONTAL);

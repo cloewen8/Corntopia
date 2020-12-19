@@ -17,13 +17,13 @@ import net.minecraft.world.ModifiableWorld;
 
 @Mixin(ServerWorld.class)
 public abstract class MixinWorld implements ModifiableWorld {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
 	
 	@Shadow
 	public abstract boolean spawnEntity(Entity entity);
 	
 	@Inject(at = @At("HEAD"), method = "addEntity", cancellable = true)
-	private void replaceCornItemEntity(Entity entity, CallbackInfoReturnable<Boolean> info) {
+	public void replaceCornItemEntity(Entity entity, CallbackInfoReturnable<Boolean> info) {
 		if (entity.getClass().equals(ItemEntity.class) && ((ItemEntity)entity).getStack().getItem().equals(Items.CORN)) {
 			LOGGER.info("Corn item entity detected (replacing)!");
 			CornItemEntity replacement = new CornItemEntity((ItemEntity)entity);

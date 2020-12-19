@@ -4,7 +4,9 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   	"ItemEntityMixin",
-  	"server.MixinWorld"
+  	"IItemEntityMixin",
+  	"server.MixinWorld",
+  	"ExplosionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
