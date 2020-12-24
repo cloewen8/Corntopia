@@ -1,6 +1,7 @@
 package ca.cjloewen.corntopia;
 
 import ca.cjloewen.corntopia.block.Blocks;
+import ca.cjloewen.corntopia.entity.CornItemEntity;
 import ca.cjloewen.corntopia.item.Items;
 import ca.cjloewen.corntopia.world.biome.BiomeKeys;
 import ca.cjloewen.corntopia.world.biome.Biomes;
@@ -18,6 +19,7 @@ import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
@@ -40,6 +42,8 @@ public class CorntopiaMod implements ModInitializer {
 		CompostingChanceRegistry.INSTANCE.add(Items.CORN, 0.65F);
 		// Popcorn
 		Registry.register(Registry.ITEM, new Identifier(NAMESPACE, "popcorn"), Items.POPCORN);
+		Registry.register(Registry.CUSTOM_STAT, CornItemEntity.STAT.getPath(), CornItemEntity.STAT);
+		Stats.CUSTOM.getOrCreateStat(CornItemEntity.STAT);
 		// Corn Field
 		Registry.register(BuiltinRegistries.BIOME, BiomeKeys.CORN_FIELD.getValue(), Biomes.CORN_FIELD);
 		Registry.register(Registry.FEATURE, new Identifier(NAMESPACE, "fill_horizontal"), Features.FILL_HORIZONTAL);

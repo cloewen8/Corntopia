@@ -3,12 +3,17 @@ package ca.cjloewen.corntopia.entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import ca.cjloewen.corntopia.CorntopiaMod;
 import ca.cjloewen.corntopia.item.Items;
 import ca.cjloewen.corntopia.mixin.IItemEntityMixin;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.EntityDamageSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -16,6 +21,7 @@ import net.minecraft.world.explosion.Explosion;
 
 public class CornItemEntity extends ItemEntity {
 	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
+	public static final Identifier STAT = new Identifier(CorntopiaMod.NAMESPACE, "corn_popped");
 	private double explosionX;
 	private double explosionY;
 	private double explosionZ;
@@ -49,6 +55,11 @@ public class CornItemEntity extends ItemEntity {
 				World world = getEntityWorld();
 				ItemEntity popcorn;
 				LOGGER.info("Spawning " + spawnAmount + " popcorn!");
+				if (source instanceof EntityDamageSource) {
+					Entity entity = ((EntityDamageSource)source).getAttacker();
+					if (entity instanceof PlayerEntity)
+						((PlayerEntity)entity).increaseStat(STAT, getStack().getCount());
+				}
 				for (float i = 0; i < spawnAmount; i++) {
 					popcorn = new ItemEntity(world, this.getX(), this.getY(), this.getZ(), new ItemStack(Items.POPCORN));
 					// Set the velocity if the explosion position is available.
