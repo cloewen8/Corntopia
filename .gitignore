@@ -34,3 +34,15 @@ bin/
 
 run/*
 !run/server.properties
+!run/saves
+run/saves/*
+
+# Structure design world
+
+!run/saves/StructureDesign
+run/saves/StructureDesign/session.lock
+run/saves/StructureDesign/level.dat_old
+run/saves/StructureDesign/advancements
+run/saves/StructureDesign/generated
+run/saves/StructureDesign/playerdata
+run/saves/StructureDesign/stats
