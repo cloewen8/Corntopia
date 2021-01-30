@@ -4,15 +4,19 @@ import ca.cjloewen.corntopia.block.Blocks;
 import ca.cjloewen.corntopia.world.biome.BiomeKeys;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.placer.DoublePlantPlacer;
 import net.minecraft.world.gen.stateprovider.SimpleBlockStateProvider;
 
 public class ConfiguredFeatures {
 	public static final ConfiguredFeature<?, ?> CORN_STALK;
+	public static final ConfiguredStructureFeature<?, ?> BARN;
 	
 	static {
 		CORN_STALK = Features.FILL_HORIZONTAL
 			.configure(ConfiguredFeatures.Configs.CORN_STALK_CONFIG);
+		BARN = StructureFeatures.BARN.configure(DefaultFeatureConfig.DEFAULT);
 	}
 	
 	public static final class Configs {

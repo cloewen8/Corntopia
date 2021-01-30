@@ -3,10 +3,14 @@ package ca.cjloewen.corntopia;
 import ca.cjloewen.corntopia.block.Blocks;
 import ca.cjloewen.corntopia.entity.CornItemEntity;
 import ca.cjloewen.corntopia.item.Items;
+import ca.cjloewen.corntopia.structure.StructurePieceType;
+import ca.cjloewen.corntopia.structure.processor.BrokenStructureProcessor;
+import ca.cjloewen.corntopia.structure.processor.OffsetYStructureProcessor;
 import ca.cjloewen.corntopia.world.biome.BiomeKeys;
 import ca.cjloewen.corntopia.world.biome.Biomes;
 import ca.cjloewen.corntopia.world.gen.feature.ConfiguredFeatures;
 import ca.cjloewen.corntopia.world.gen.feature.Features;
+import ca.cjloewen.corntopia.world.gen.feature.StructureFeatures;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
@@ -17,6 +21,7 @@ import net.fabricmc.fabric.api.biome.v1.OverworldClimate;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.structure.v1.FabricStructureBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.stat.Stats;
@@ -33,6 +38,7 @@ public class CorntopiaMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		Identifier cornStalkId = new Identifier(NAMESPACE, "corn_stalk");
+		Identifier barnId = new Identifier(NAMESPACE, "barn");
 		// Corn Stalk
 		Registry.register(Registry.BLOCK, cornStalkId, Blocks.CORN_STALK);
 		Registry.register(Registry.ITEM, cornStalkId, Items.KERNELS);
@@ -49,9 +55,22 @@ public class CorntopiaMod implements ModInitializer {
 		Registry.register(Registry.FEATURE, new Identifier(NAMESPACE, "fill_horizontal"), Features.FILL_HORIZONTAL);
 		// Corn Stalk Feature
 		Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, cornStalkId, ConfiguredFeatures.CORN_STALK);
+		// Structure Processors
+		Registry.register(Registry.STRUCTURE_PROCESSOR, new Identifier(NAMESPACE, "offset_y"), OffsetYStructureProcessor.OFFSETY);
+		Registry.register(Registry.STRUCTURE_PROCESSOR, new Identifier(NAMESPACE, "broken"), BrokenStructureProcessor.BROKEN);
+		// Barn
+		Registry.register(Registry.STRUCTURE_PIECE, new Identifier(NAMESPACE, "barn_base"), StructurePieceType.BARN);
+		FabricStructureBuilder.create(barnId, StructureFeatures.BARN)
+			.step(GenerationStep.Feature.SURFACE_STRUCTURES)
+			.defaultConfig(32, 2, 1404)
+			.adjustsSurface()
+			.register();
+		BuiltinRegistries.add(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, barnId, ConfiguredFeatures.BARN);
 		// FIXME Says Deprecated but does not say what to use instead. If anyone knows, please tell me.
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.VEGETAL_DECORATION,
 			RegistryKey.of(Registry.CONFIGURED_FEATURE_WORLDGEN, cornStalkId));
+		BiomeModifications.addStructure(BiomeSelectors.includeByKey(BiomeKeys.CORN_FIELD),
+			RegistryKey.of(Registry.CONFIGURED_STRUCTURE_FEATURE_WORLDGEN, barnId));
 		OverworldBiomes.addContinentalBiome(BiomeKeys.CORN_FIELD, OverworldClimate.TEMPERATE, 1);
 		
 		if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT))
