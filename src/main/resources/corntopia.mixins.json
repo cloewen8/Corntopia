@@ -5,8 +5,10 @@
   "mixins": [
   	"ItemEntityMixin",
   	"IItemEntityMixin",
-  	"server.MixinWorld",
-  	"ExplosionMixin"
+  	"WorldMixin",
+  	"ExplosionMixin",
+  	"LootManagerMixin",
+  	"IBinomialLootTableRange"
   ],
   "injectors": {
     "defaultRequire": 1

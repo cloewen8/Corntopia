@@ -1,4 +1,4 @@
-package ca.cjloewen.corntopia.mixin.server;
+package ca.cjloewen.corntopia.mixin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.ModifiableWorld;
 
 @Mixin(ServerWorld.class)
-public abstract class MixinWorld implements ModifiableWorld {
+public abstract class WorldMixin implements ModifiableWorld {
 	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
 	
 	@Shadow
