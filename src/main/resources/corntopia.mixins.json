@@ -8,7 +8,8 @@
   	"WorldMixin",
   	"ExplosionMixin",
   	"LootManagerMixin",
-  	"IBinomialLootTableRange"
+  	"IBinomialLootTableRange",
+  	"SignTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

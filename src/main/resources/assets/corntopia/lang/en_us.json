@@ -1,7 +1,9 @@
 {
 	"block.corntopia.corn_stalk": "Corn Stalk",
+	"block.corntopia.barn_planks": "Barn Planks",
 	"item.corntopia.corn": "Corn",
 	"item.corntopia.popcorn": "Popcorn",
+	"item.corntopia.barn_planks": "Barn Planks",
 	"biome.corntopia.corn_field": "Corn Field",
 	"stat.corntopia.corn_popped": "Corn popped"
 }

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 
+import ca.cjloewen.corntopia.BuildingBlocks;
 import ca.cjloewen.corntopia.CorntopiaMod;
 import ca.cjloewen.corntopia.loot.LootTables;
 import ca.cjloewen.corntopia.structure.processor.BrokenStructureProcessor;
@@ -53,7 +54,7 @@ public class BarnGenerator {
 		// Nothing
 			barnType = BarnType.BROKEN;
 		
-		pieces.add(new Piece(manager, "base", pos, rotation, false, Blocks.OAK_PLANKS.getDefaultState(), barnType));
+		pieces.add(new Piece(manager, "base", pos, rotation, false, BuildingBlocks.PLANKS_BLOCKS.get("barn").getDefaultState(), barnType));
 		if (toggles[0])
 			pieces.add(new Piece(manager, "pile_front", pos.add(new BlockPos(8, 1, 2).rotate(rotation)), rotation, false, pileState, barnType));
 		if (toggles[1])
@@ -63,14 +64,14 @@ public class BarnGenerator {
 		if (toggles[3])
 			pieces.add(new Piece(manager, "pile_back", pos.add(new BlockPos(4, 1, 10).rotate(rotation)), rotation, true, pileState, barnType));
 		if (toggles[4]) {
-			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(6, 0, 2).rotate(rotation)), rotation, false, Blocks.OAK_PLANKS.getDefaultState(), barnType));
+			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(6, 0, 2).rotate(rotation)), rotation, false, BuildingBlocks.PLANKS_BLOCKS.get("barn").getDefaultState(), barnType));
 			if (toggles[5])
 				pieces.add(new Piece(manager, "lamp_tall", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
 			else if (toggles[6])
 				pieces.add(new Piece(manager, "lamp_short", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
 		}
 		if (toggles[7]) {
-			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(5, 0, 2).rotate(rotation)), rotation, true, Blocks.OAK_PLANKS.getDefaultState(), barnType));
+			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(5, 0, 2).rotate(rotation)), rotation, true, BuildingBlocks.PLANKS_BLOCKS.get("barn").getDefaultState(), barnType));
 			if (toggles[8])
 				pieces.add(new Piece(manager, "lamp_tall", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
 			else if (toggles[9])
@@ -118,7 +119,7 @@ public class BarnGenerator {
 			if (this.barnType.equals(BarnType.BROKEN)) {
 				float probability = 0.2F;
 				placementData.addProcessor(new BrokenStructureProcessor(structure.getSize(), ImmutableList.of(
-					new BrokenStructureProcessor.Rule(Blocks.OAK_PLANKS, probability, Blocks.AIR.getDefaultState()),
+					new BrokenStructureProcessor.Rule(BuildingBlocks.PLANKS_BLOCKS.get("barn"), probability, Blocks.AIR.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.OAK_LOG, probability, Blocks.AIR.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.CRIMSON_SLAB, probability, Blocks.AIR.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.CRIMSON_STAIRS, probability, Blocks.AIR.getDefaultState()),

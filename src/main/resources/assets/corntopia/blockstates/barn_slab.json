@@ -1,0 +1,13 @@
+{
+	"variants": {
+		"type=bottom": {
+			"model": "corntopia:block/barn_slab"
+		},
+		"type=double": {
+			"model": "corntopia:block/barn_planks"
+		},
+		"type=top": {
+			"model": "corntopia:block/barn_slab_top"
+		}
+	}
+}
