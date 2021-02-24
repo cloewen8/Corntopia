@@ -7,7 +7,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ca.cjloewen.corntopia.mixin.SignTypeMixin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,9 +21,14 @@ import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.block.SignBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.StoneButtonBlock;
 import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.block.WallSignBlock;
 import net.minecraft.block.WoodenButtonBlock;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -28,6 +37,7 @@ import net.minecraft.item.SignItem;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.SignType;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
@@ -41,6 +51,7 @@ public class BuildingBlocks {
 		SLAB(          0b00000010),
 		STAIRS(        0b00000100),
 		PRESSURE_PLATE(0b00001000),
+		/** @deprecated Not yet functional. */
 		SIGN(          0b00010000),
 		TRAPDOOR(      0b00100000),
 		BUTTON(        0b01000000);
@@ -57,7 +68,7 @@ public class BuildingBlocks {
 	
 	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
 	// Blocks
-	public static final Map<String, Block> PLANKS_BLOCKS = new HashMap<>();
+	public static final Map<String, Block> BLOCKS = new HashMap<>();
 	public static final Map<String, Block> STAIRS_BLOCKS = new HashMap<>();
 	public static final Map<String, Block> SIGN_BLOCKS = new HashMap<>();
 	public static final Map<String, Block> WALL_SIGN_BLOCKS = new HashMap<>();
@@ -66,23 +77,29 @@ public class BuildingBlocks {
 	public static final Map<String, Block> BUTTON_BLOCKS = new HashMap<>();
 	public static final Map<String, Block> SLAB_BLOCKS = new HashMap<>();
 	// Items
-	public static final Map<String, Item> PLANKS_ITEMS = new HashMap<>();
+	public static final Map<String, Item> ITEMS = new HashMap<>();
 	public static final Map<String, Item> STAIRS_ITEMS = new HashMap<>();
 	public static final Map<String, Item> SIGN_ITEMS = new HashMap<>();
 	public static final Map<String, Item> PRESSURE_PLATE_ITEMS = new HashMap<>();
 	public static final Map<String, Item> TRAPDOOR_ITEMS = new HashMap<>();
 	public static final Map<String, Item> BUTTON_ITEMS = new HashMap<>();
 	public static final Map<String, Item> SLAB_ITEMS = new HashMap<>();
+	// Entities
+	public static final Map<String, BlockEntityType<SignBlockEntity>> SIGNS = new HashMap<>();
 	
 	/**
 	 * Registers building blocks, items and related types.
 	 * 
 	 * @param name The prefix for identifiers.
 	 * @param exclude A bitmask of blocks to exclude (see {@code ExcludeMask}).
+	 * @param material The {@link Material} to use for blocks.
+	 * @param color The {@link MaterialColor} to use for blocks.
+	 * @param soundGroup The {@link BlockSoundGroup} to use for blocks.
 	 * @implNote Only a name can be provided currently. Once a basic implementation is done, I'll add additional parameters to {@code register}.
 	 * @implNote Resources are not created automatically. If this method is used, create the following (where * is {@code name}):<br />
-	 * <b>Planks</b><br />
-	 * - assets.corntopia.blockstates.*_planks.json
+	 * <b>Planks</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_planks.json
 	 * <pre><code>
 {
 	"variants": {
@@ -91,8 +108,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_planks.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_planks.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/cube_all",
@@ -100,15 +117,17 @@ public class BuildingBlocks {
 		"all": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_planks.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_planks.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_planks"
 }
-	 * </code></pre>
-	 * <b>Stairs</b><br />
-	 * - assets.corntopia.blockstates.*_stairs.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Stairs</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_stairs.json
 	 * <pre><code>
 {
 	"variants": {
@@ -319,8 +338,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.models.block.*_stairs.json
+	 * </code></pre></li>
+	 * <li>assets.models.block.*_stairs.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/stairs",
@@ -330,8 +349,8 @@ public class BuildingBlocks {
 		"side": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.models.block.*_stairs_inner.json
+	 * </code></pre></li>
+	 * <li>assets.models.block.*_stairs_inner.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/inner_stairs",
@@ -341,8 +360,8 @@ public class BuildingBlocks {
 		"side": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.models.block.*_stairs_outer.json
+	 * </code></pre></li>
+	 * <li>assets.models.block.*_stairs_outer.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/outer_stairs",
@@ -352,15 +371,17 @@ public class BuildingBlocks {
 		"side": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_stairs.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_stairs.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_stairs"
 }
-	 * </code></pre>
-	 * <b>Pressure Plate</b><br />
-	 * - assets.corntopia.blockstates.*_pressure_plate.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Pressure Plate</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_pressure_plate.json
 	 * <pre><code>
 {
 	"variants": {
@@ -372,8 +393,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_pressure_plate.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_pressure_plate.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/pressure_plate_up",
@@ -381,8 +402,8 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_pressure_plate_down.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_pressure_plate_down.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/pressure_plate_down",
@@ -390,15 +411,17 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_pressure_plate.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_pressure_plate.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_pressure_plate"
 }
-	 * </code></pre>
-	 * <b>Sign</b><br />
-	 * - assets.corntopia.blockstates.*_sign.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Sign</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_sign.json
 	 * <pre><code>
 {
 	"variants": {
@@ -407,16 +430,16 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_sign.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_sign.json
 	 * <pre><code>
 {
 	"textures": {
 		"particle": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.blockstates.*_wall_sign.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.blockstates.*_wall_sign.json
 	 * <pre><code>
 {
 	"variants": {
@@ -425,8 +448,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_sign.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_sign.json
 	 * <pre><code>
 {
 	"parent": "minecraft:item/generated",
@@ -434,9 +457,11 @@ public class BuildingBlocks {
 		"layer0": "corntopia:item/*_sign"
 	}
 }
-	 * </code></pre>
-	 * <b>Trapdoor</b><br />
-	 * - assets.corntopia.blockstates.*_trapdoor.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Trapdoor</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_trapdoor.json
 	 * <pre><code>
 {
 	"variants": {
@@ -496,8 +521,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_trapdoor_bottom.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_trapdoor_bottom.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/template_trapdoor_bottom",
@@ -505,8 +530,8 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_trapdoor"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_trapdoor_open.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_trapdoor_open.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/template_trapdoor_open",
@@ -514,8 +539,8 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_trapdoor"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_trapdoor_top.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_trapdoor_top.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/template_trapdoor_top",
@@ -523,15 +548,17 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_trapdoor"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_trapdoor.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_trapdoor.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_trapdoor_bottom"
 }
-	 * </code></pre>
-	 * <b>Button</b><br />
-	 * - assets.corntopia.blockstates.*_button.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Button</b>
+	 * <ul>
+	 * <li>assets.corntopia.blockstates.*_button.json
 	 * <pre><code>
 {
 	"variants": {
@@ -651,8 +678,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_button.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_button.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/button",
@@ -660,8 +687,8 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_button_pressed.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_button_pressed.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/button_pressed",
@@ -669,15 +696,17 @@ public class BuildingBlocks {
 		"texture": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.item.*_button.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.item.*_button.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_button_inventory"
 }
-	 * </code></pre>
-	 * <b>Slab</b><br />
-	 * - assets.corntopia.blockstates.*_slab.json
+	 * </code></pre></li>
+	 * </ul>
+	 * <b>Slab</b>
+	 * </ul>
+	 * <li>assets.corntopia.blockstates.*_slab.json
 	 * <pre><code>
 {
 	"variants": {
@@ -692,8 +721,8 @@ public class BuildingBlocks {
 		}
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_slab.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_slab.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/slab",
@@ -703,8 +732,8 @@ public class BuildingBlocks {
 		"side": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_slab_top.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_slab_top.json
 	 * <pre><code>
 {
 	"parent": "minecraft:block/slab_top",
@@ -714,16 +743,59 @@ public class BuildingBlocks {
 		"side": "corntopia:block/*_planks"
 	}
 }
-	 * </code></pre>
-	 * - assets.corntopia.models.block.*_planks.json (see <b>Planks</b>)<br />
-	 * - assets.corntopia.models.item.*_slab.json
+	 * </code></pre></li>
+	 * <li>assets.corntopia.models.block.*_planks.json (see <b>Planks</b>)</li>
+	 * <li>assets.corntopia.models.item.*_slab.json
 	 * <pre><code>
 {
 	"parent": "corntopia:block/*_slab"
 }
-	 * </code></pre>
+	 * </code></pre></li>
+	 * </ul>
+	 * Optionally, add each block and item to its respective tags:<br />
+	 * <b>Blocks (data.minecraft.tags.blocks)</b>
+	 * <ul>
+	 * <li>Planks - planks</li>
+	 * <li>Slab - wooden_slabs or (slabs)</li>
+	 * <li>Stairs - wooden_stairs (or stairs)</li>
+	 * <li>Pressure Plate - wooden_pressure_plates (or stone_pressure_plates or pressure_plates)</li>
+	 * <li>Sign - standing_signs and wall_signs</li>
+	 * <li>Trapdoor - wooden_trapdoors (or trapdoors)</li>
+	 * <li>Button - wooden_buttons (or buttons)</li>
+	 * <li>All - non_flammable_wood</li>
+	 * </ul>
+	 * <b>Items (data.minecraft.tags.items)</b>
+	 * <ul>
+	 * <li>Planks - planks</li>
+	 * <li>Slab - wooden_slabs (or slabs)</li>
+	 * <li>Stairs - wooden_stairs (stairs)</li>
+	 * <li>Pressure Plate - wooden_pressure_plates</li>
+	 * <li>Sign - signs</li>
+	 * <li>Trapdoor - wooden_trapdoors (or trapdoors)</li>
+	 * <li>Button - wooden_buttons (or buttons)</li>
+	 * <li>All - non_flammable_wood</li>
+	 * </ul>
+	 * Localizations need to be added for:
+	 * <ul>
+	 * <li>block.corntopia.*_planks</li>
+	 * <li>block.corntopia.*_slab</li>
+	 * <li>block.corntopia.*_stairs</li>
+	 * <li>block.corntopia.*_pressure_plate</li>
+	 * <li>block.corntopia.*_sign</li>
+	 * <li>block.corntopia.*_wall_sign</li>
+	 * <li>block.corntopia.*_trapdoor</li>
+	 * <li>block.corntopia.*_button</li>
+	 * <li>item.corntopia.*_planks</li>
+	 * <li>item.corntopia.*_slab</li>
+	 * <li>item.corntopia.*_stairs</li>
+	 * <li>item.corntopia.*_pressure_plate</li>
+	 * <li>item.corntopia.*_sign</li>
+	 * <li>item.corntopia.*_trapdoor</li>
+	 * <li>item.corntopia.*_button</li>
+	 * </ul>
 	 */
-	public static void register(String name, long exclude) {
+	public static void register(String name, long exclude, Material material, MaterialColor color, BlockSoundGroup soundGroup) {
+		// FIXME: Add custom BoatEntity.Type if Minecraft ever makes it not an enum.
 		Block planks = null;
 		StairsBlock stairs;
 		PressurePlateBlock pressurePlate;
@@ -735,18 +807,18 @@ public class BuildingBlocks {
 		SignType signType;
 		
 		if (!ExcludeMask.PLANKS.contains(exclude)) {
-			planks = createPlanksBlock();
-			PLANKS_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_planks"), planks));
-			PLANKS_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_planks"), createBuildingBlockItem(planks)));
+			planks = createPlanksBlock(material, color, soundGroup);
+			BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_planks"), registerFlammable(planks, material)));
+			ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_planks"), createBuildingBlockItem(planks)));
 		}
 		if (!ExcludeMask.SLAB.contains(exclude)) {
-			slab = createSlab();
-			SLAB_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_slab"), slab));
+			slab = createSlab(material, color, soundGroup);
+			SLAB_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_slab"), registerFlammable(slab, material)));
 			SLAB_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_slab"), createBuildingBlockItem(slab)));
 		}
 		if (!ExcludeMask.STAIRS.contains(exclude) && planks != null) {
 			stairs = createStairsBlock(planks);
-			STAIRS_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_stairs"), stairs));
+			STAIRS_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_stairs"), registerFlammable(stairs, material)));
 			STAIRS_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_stairs"), createBuildingBlockItem(stairs)));
 		} else if (planks == null)
 			LOGGER.warn("Stairs was not made for the %s building block type (missing Planks).", name);
@@ -757,24 +829,32 @@ public class BuildingBlocks {
 		} else if (planks == null)
 			LOGGER.warn("A pressure plate was not made for the %s building block type (missing Planks).", name);
 		if (!ExcludeMask.SIGN.contains(exclude)) {
+			// FIXME: Signs don't render when placed. Guessing it is a problem with the sign entity type (needs further research).
 			signType = new CustomSignType(name);
-			sign = createSignBlock(signType);
-			wallSign = createWallSignBlock(signType, sign);
+			sign = createSignBlock(signType, material, soundGroup);
+			wallSign = createWallSignBlock(signType, sign, material, soundGroup);
+			BlockEntityType<SignBlockEntity> signEntityType = BlockEntityType.Builder.create(SignBlockEntity::new, sign, wallSign).build(Util.getChoiceType(TypeReferences.BLOCK_ENTITY, "sign"));
 			SignTypeMixin.invokeRegister(signType);
+			SIGNS.put(name, Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(CorntopiaMod.NAMESPACE, name + "sign"), signEntityType));
 			SIGN_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_sign"), sign));
 			WALL_SIGN_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_wall_sign"), wallSign));
 			SIGN_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_sign"), createSignBlockItem(sign, wallSign)));
 		}
 		if (!ExcludeMask.TRAPDOOR.contains(exclude)) {
-			trapdoor = createTrapdoor();
-			TRAPDOOR_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_trapdoor"), trapdoor));
+			trapdoor = createTrapdoor(material, color, soundGroup);
+			TRAPDOOR_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_trapdoor"), registerRenderLayer(trapdoor, RenderLayer.getCutout())));
 			TRAPDOOR_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_trapdoor"), createRedstoneBlockItem(trapdoor)));
 		}
 		if (!ExcludeMask.BUTTON.contains(exclude)) {
-			button = createButton();
+			button = createButton(material, soundGroup);
 			BUTTON_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_button"), button));
 			BUTTON_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_button"), createRedstoneBlockItem(button)));
 		}
+	}
+	
+	/** @see #register(String, long) */
+	public static void register(String name, long exclude) {
+		register(name, exclude, Material.WOOD, MaterialColor.WOOD, BlockSoundGroup.WOOD);
 	}
 	
 	/** @see #register(String, long) */
@@ -782,8 +862,8 @@ public class BuildingBlocks {
 		register(name, 0);
 	}
 	
-	private static Block createPlanksBlock() {
-		return new Block(FabricBlockSettings.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F, 3.0F).sounds(BlockSoundGroup.WOOD));
+	private static Block createPlanksBlock(Material material, MaterialColor color, BlockSoundGroup soundGroup) {
+		return new Block(FabricBlockSettings.of(material, color).strength(2.0F, 3.0F).sounds(soundGroup));
 	}
 	
 	private static StairsBlock createStairsBlock(Block planks) {
@@ -791,27 +871,30 @@ public class BuildingBlocks {
 	}
 	
 	private static PressurePlateBlock createPressurePlate(Block planks) {
-		return new CustomPressurePlateBlock(PressurePlateBlock.ActivationRule.EVERYTHING, FabricBlockSettings.of(Material.WOOD, planks.getDefaultMaterialColor()).noCollision().strength(0.5F).sounds(BlockSoundGroup.WOOD));
+		return new CustomPressurePlateBlock(PressurePlateBlock.ActivationRule.EVERYTHING, FabricBlockSettings.copyOf(planks).noCollision().strength(0.5F));
 	}
 	
-	private static SignBlock createSignBlock(SignType type) {
-		return new SignBlock(FabricBlockSettings.of(Material.WOOD).noCollision().strength(1.0F).sounds(BlockSoundGroup.WOOD), type);
+	private static SignBlock createSignBlock(SignType type, Material material, BlockSoundGroup soundGroup) {
+		return new SignBlock(FabricBlockSettings.of(material).noCollision().strength(1.0F).sounds(soundGroup), type);
 	}
 	
-	private static WallSignBlock createWallSignBlock(SignType type, SignBlock sign) {
-		return new WallSignBlock(FabricBlockSettings.of(Material.WOOD).noCollision().strength(1.0F).sounds(BlockSoundGroup.WOOD).dropsLike(sign), type);
+	private static WallSignBlock createWallSignBlock(SignType type, SignBlock sign, Material material, BlockSoundGroup soundGroup) {
+		return new WallSignBlock(FabricBlockSettings.of(material).noCollision().strength(1.0F).sounds(soundGroup).dropsLike(sign), type);
 	}
 	
-	private static TrapdoorBlock createTrapdoor() {
-		return new CustomTrapdoorBlock(FabricBlockSettings.of(Material.WOOD, MaterialColor.WOOD).strength(3.0F).sounds(BlockSoundGroup.WOOD).nonOpaque().allowsSpawning(BuildingBlocks::never));
+	private static TrapdoorBlock createTrapdoor(Material material, MaterialColor color, BlockSoundGroup soundGroup) {
+		return new CustomTrapdoorBlock(FabricBlockSettings.of(material, color).strength(3.0F).sounds(soundGroup).nonOpaque().allowsSpawning(BuildingBlocks::never));
 	}
 	
-	private static AbstractButtonBlock createButton() {
-		return new CustomWoodenButtonBlock(FabricBlockSettings.of(Material.SUPPORTED).noCollision().strength(0.5F).sounds(BlockSoundGroup.WOOD));
+	private static AbstractButtonBlock createButton(Material material, BlockSoundGroup soundGroup) {
+		if (material.equals(Material.STONE))
+			return new CustomStoneButtonBlock(FabricBlockSettings.of(Material.SUPPORTED).noCollision().strength(0.5F).sounds(soundGroup));
+		else
+			return new CustomWoodenButtonBlock(FabricBlockSettings.of(Material.SUPPORTED).noCollision().strength(0.5F).sounds(soundGroup));
 	}
 	
-	private static SlabBlock createSlab() {
-		return new SlabBlock(FabricBlockSettings.of(Material.WOOD, MaterialColor.WOOD).strength(2.0F, 3.0F).sounds(BlockSoundGroup.WOOD));
+	private static SlabBlock createSlab(Material material, MaterialColor color, BlockSoundGroup soundGroup) {
+		return new SlabBlock(FabricBlockSettings.of(material, color).strength(2.0F, 3.0F).sounds(soundGroup));
 	}
 	
 	private static Item createBuildingBlockItem(Block block) {
@@ -828,6 +911,18 @@ public class BuildingBlocks {
 	
 	private static Boolean never(BlockState state, BlockView world, BlockPos pos, EntityType<?> type) {
 		return false;
+	}
+	
+	private static Block registerFlammable(Block block, Material material) {
+		if (Material.WOOD.equals(material))
+			FlammableBlockRegistry.getDefaultInstance().add(block, new FlammableBlockRegistry.Entry(5, 20));
+		return block;
+	}
+	
+	private static Block registerRenderLayer(Block block, RenderLayer renderLayer) {
+		if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT))
+			BlockRenderLayerMap.INSTANCE.putBlock(block, renderLayer);
+		return block;
 	}
 	
 	private static class CustomStairsBlock extends StairsBlock {
@@ -850,6 +945,12 @@ public class BuildingBlocks {
 	
 	private static class CustomTrapdoorBlock extends TrapdoorBlock {
 		protected CustomTrapdoorBlock(Settings settings) {
+			super(settings);
+		}
+	}
+	
+	private static class CustomStoneButtonBlock extends StoneButtonBlock {
+		protected CustomStoneButtonBlock(Settings settings) {
 			super(settings);
 		}
 	}

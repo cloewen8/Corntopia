@@ -40,6 +40,7 @@ public class CorntopiaMod implements ModInitializer {
 		Identifier cornStalkId = new Identifier(NAMESPACE, "corn_stalk");
 		Identifier barnId = new Identifier(NAMESPACE, "barn");
 		// Barn planks (no signs, trapdoors or buttons)
+		// Going to try adding signs once they work properly.
 		BuildingBlocks.register("barn", 0b01110000);
 		// Corn Stalk
 		Registry.register(Registry.BLOCK, cornStalkId, Blocks.CORN_STALK);
