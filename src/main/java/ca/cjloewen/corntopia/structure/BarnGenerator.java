@@ -30,8 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.ServerWorldAccess;
 
-// TODO Add Barn Planks and replace the barn walls with it.
-// TODO Add Barn Roof and replace the barn roof with it.
 public class BarnGenerator {
 	enum BarnType {
 		USED, ABANDONED, BROKEN
@@ -121,8 +119,9 @@ public class BarnGenerator {
 				placementData.addProcessor(new BrokenStructureProcessor(structure.getSize(), ImmutableList.of(
 					new BrokenStructureProcessor.Rule(BuildingBlocks.BLOCKS.get("barn"), probability, Blocks.AIR.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.OAK_LOG, probability, Blocks.AIR.getDefaultState()),
-					new BrokenStructureProcessor.Rule(Blocks.CRIMSON_SLAB, probability, Blocks.AIR.getDefaultState()),
-					new BrokenStructureProcessor.Rule(Blocks.CRIMSON_STAIRS, probability, Blocks.AIR.getDefaultState()),
+					new BrokenStructureProcessor.Rule(BuildingBlocks.BLOCKS.get("barn_roof"), probability, Blocks.AIR.getDefaultState()),
+					new BrokenStructureProcessor.Rule(BuildingBlocks.SLAB_BLOCKS.get("barn_roof"), probability, Blocks.AIR.getDefaultState()),
+					new BrokenStructureProcessor.Rule(BuildingBlocks.STAIRS_BLOCKS.get("barn_roof"), probability, Blocks.AIR.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.GRASS_PATH, 0.33F, Blocks.GRASS_BLOCK.getDefaultState()),
 					new BrokenStructureProcessor.Rule(Blocks.GRASS_PATH, 0.66F, Blocks.COARSE_DIRT.getDefaultState()))));
 			}

@@ -42,6 +42,8 @@ public class CorntopiaMod implements ModInitializer {
 		// Barn planks (no signs, trapdoors or buttons)
 		// Going to try adding signs once they work properly.
 		BuildingBlocks.register("barn", 0b01110000);
+		// Barn Roof Planks
+		BuildingBlocks.register("barn_roof", 0b01111000);
 		// Corn Stalk
 		Registry.register(Registry.BLOCK, cornStalkId, Blocks.CORN_STALK);
 		Registry.register(Registry.ITEM, cornStalkId, Items.KERNELS);

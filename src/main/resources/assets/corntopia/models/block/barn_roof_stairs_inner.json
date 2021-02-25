@@ -1,0 +1,8 @@
+{
+	"parent": "minecraft:block/inner_stairs",
+	"textures": {
+		"bottom": "corntopia:block/barn_roof_planks",
+		"top": "corntopia:block/barn_roof_planks",
+		"side": "corntopia:block/barn_roof_planks"
+	}
+}
