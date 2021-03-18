@@ -1,5 +1,6 @@
 package ca.cjloewen.corntopia.structure;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
@@ -27,8 +28,12 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.gen.StructureAccessor;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
 
 public class BarnGenerator {
 	enum BarnType {
@@ -52,39 +57,41 @@ public class BarnGenerator {
 		// Nothing
 			barnType = BarnType.BROKEN;
 		
-		pieces.add(new Piece(manager, "base", pos, rotation, false, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
+		pieces.add(new BarnPiece(manager, "base", pos, rotation, false, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
 		if (toggles[0])
-			pieces.add(new Piece(manager, "pile_front", pos.add(new BlockPos(8, 1, 2).rotate(rotation)), rotation, false, pileState, barnType));
+			pieces.add(new BarnPiece(manager, "pile_front", pos.add(new BlockPos(8, 1, 2).rotate(rotation)), rotation, false, pileState, barnType));
 		if (toggles[1])
-			pieces.add(new Piece(manager, "pile_front", pos.add(new BlockPos(3, 1, 2).rotate(rotation)), rotation, true, pileState, barnType));
+			pieces.add(new BarnPiece(manager, "pile_front", pos.add(new BlockPos(3, 1, 2).rotate(rotation)), rotation, true, pileState, barnType));
 		if (toggles[2])
-			pieces.add(new Piece(manager, "pile_back", pos.add(new BlockPos(7, 1, 10).rotate(rotation)), rotation, false, pileState, barnType));
+			pieces.add(new BarnPiece(manager, "pile_back", pos.add(new BlockPos(7, 1, 10).rotate(rotation)), rotation, false, pileState, barnType));
 		if (toggles[3])
-			pieces.add(new Piece(manager, "pile_back", pos.add(new BlockPos(4, 1, 10).rotate(rotation)), rotation, true, pileState, barnType));
+			pieces.add(new BarnPiece(manager, "pile_back", pos.add(new BlockPos(4, 1, 10).rotate(rotation)), rotation, true, pileState, barnType));
 		if (toggles[4]) {
-			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(6, 0, 2).rotate(rotation)), rotation, false, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
+			pieces.add(new BarnPiece(manager, "platform", pos.add(new BlockPos(6, 0, 2).rotate(rotation)), rotation, false, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
 			if (toggles[5])
-				pieces.add(new Piece(manager, "lamp_tall", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
+				pieces.add(new BarnPiece(manager, "lamp_tall", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
 			else if (toggles[6])
-				pieces.add(new Piece(manager, "lamp_short", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
+				pieces.add(new BarnPiece(manager, "lamp_short", pos.add(new BlockPos(8, 3, 8).rotate(rotation)), rotation, false, Blocks.AIR.getDefaultState(), barnType));
 		}
 		if (toggles[7]) {
-			pieces.add(new Piece(manager, "platform", pos.add(new BlockPos(5, 0, 2).rotate(rotation)), rotation, true, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
+			pieces.add(new BarnPiece(manager, "platform", pos.add(new BlockPos(5, 0, 2).rotate(rotation)), rotation, true, BuildingBlocks.BLOCKS.get("barn").getDefaultState(), barnType));
 			if (toggles[8])
-				pieces.add(new Piece(manager, "lamp_tall", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
+				pieces.add(new BarnPiece(manager, "lamp_tall", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
 			else if (toggles[9])
-				pieces.add(new Piece(manager, "lamp_short", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
+				pieces.add(new BarnPiece(manager, "lamp_short", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
 		}
+		if (!barnType.equals(BarnType.BROKEN))
+			pieces.add(new CenterPiece(manager, pos.add(new BlockPos(4, 0, 0).rotate(rotation)), rotation));
 	}
 	
-	public static class Piece extends SimpleStructurePiece {
+	public static class BarnPiece extends SimpleStructurePiece {
 		private final String template;
 		private final BlockRotation rotation;
 		private final boolean flip;
 		private final BlockState chestReplacement;
 		private final BarnType barnType;
 
-		public Piece(StructureManager structureManager, String template, BlockPos pos, BlockRotation rotation, boolean flip, BlockState chestReplacement, BarnType barnType) {
+		public BarnPiece(StructureManager structureManager, String template, BlockPos pos, BlockRotation rotation, boolean flip, BlockState chestReplacement, BarnType barnType) {
 			super(StructurePieceType.BARN, 0);
 			this.template = template;
 			this.pos = pos;
@@ -95,7 +102,7 @@ public class BarnGenerator {
 			this.initializeStructureData(structureManager);
 		}
 
-		public Piece(StructureManager structureManager, CompoundTag compoundTag) {
+		public BarnPiece(StructureManager structureManager, CompoundTag compoundTag) {
 			super(StructurePieceType.BARN, compoundTag);
 			this.template = compoundTag.getString("Template");
 			this.rotation = BlockRotation.valueOf(compoundTag.getString("Rot"));
@@ -157,6 +164,125 @@ public class BarnGenerator {
 					LootableContainerBlockEntity.setLootTable(serverWorldAccess, random, chestPos, LootTables.BARN_ABANDONED);
 				else if (this.barnType.equals(BarnType.USED))
 					LootableContainerBlockEntity.setLootTable(serverWorldAccess, random, chestPos, LootTables.BARN_USED);
+			}
+		}
+	}
+	
+	public static class CenterPiece extends StructurePiece {
+		public static final int CENTER_DIAMETER = 7;
+		public static final int ENTRANCE_WIDTH = 4;
+		public static final int LENGTH = 16;
+		public static final int WIDTH = 4;
+		public static final int MARGIN = 4;
+		
+		private BlockPos pos;
+		private Direction dir;
+		
+		public CenterPiece(StructureManager structureManager, BlockPos pos, BlockRotation rotation) {
+			super(StructurePieceType.BARN_PATH, 0);
+			this.pos = pos;
+			this.dir = rotation.rotate(Direction.NORTH);
+			calculateBoundingBox();
+		}
+
+		public CenterPiece(StructureManager structureManager, CompoundTag compoundTag) {
+			super(StructurePieceType.BARN_PATH, compoundTag);
+			this.pos = new BlockPos(compoundTag.getInt("TPX"), compoundTag.getInt("TPY"), compoundTag.getInt("TPZ"));
+			this.dir = Direction.byId(compoundTag.getInt("Direction"));
+			calculateBoundingBox();
+		}
+		
+		private void calculateBoundingBox() {
+			int diameter = LENGTH*2;
+			int acrossOffset = ENTRANCE_WIDTH/2 - diameter/2;
+			BlockBox blockBox = new BlockBox(0, 0, 0, diameter, 1, diameter);
+			blockBox.move(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+			blockBox.move(this.dir.rotateYClockwise().getOffsetX()*acrossOffset, 0, this.dir.rotateYClockwise().getOffsetZ()*acrossOffset);
+			this.boundingBox = blockBox;
+		}
+
+		@Override
+		protected void toNbt(CompoundTag tag) {
+			tag.putInt("TPX", this.pos.getX());
+		    tag.putInt("TPY", this.pos.getY());
+		    tag.putInt("TPZ", this.pos.getZ());
+		    tag.putInt("Direction", this.dir.getId());
+		}
+
+		@Override
+		public boolean generate(StructureWorldAccess structureWorldAccess, StructureAccessor structureAccessor,
+				ChunkGenerator chunkGenerator, Random random, BlockBox boundingBox, ChunkPos chunkPos,
+				BlockPos blockPos) {
+			Direction across = this.dir.rotateYClockwise();
+			int acrossI = ENTRANCE_WIDTH/2;
+			// Fixes parallel offset.
+			if (across.getDirection().equals(Direction.AxisDirection.NEGATIVE))
+				acrossI--;
+			BlockPos middle = this.pos.offset(this.dir, LENGTH).offset(across, acrossI);
+			Direction barnDir = this.dir.getOpposite();
+			EnumSet<Direction> outDirs = EnumSet.allOf(Direction.class);
+			// Filter possible out dirs.
+			outDirs.remove(barnDir);
+			outDirs.removeIf((dir) -> dir.getAxis().equals(Direction.Axis.Y));
+			// Generate the path.
+			generateCenter(structureWorldAccess, random, middle);
+			generatePath(structureWorldAccess, random, middle, barnDir);
+			int houseI = random.nextInt(outDirs.size());
+			int outI = 0;
+			for (Direction outWay : outDirs) {
+				if (outI == houseI) {
+					generatePath(structureWorldAccess, random, middle, outWay);
+					break;
+				}
+				outI++;
+			}
+			return true;
+		}
+		
+		private void generateCenter(StructureWorldAccess structureWorldAccess, Random random, BlockPos middle) {
+			int centerRadius = Math.floorDiv(CENTER_DIAMETER, 2);
+			float centerOffsetX;
+			float centerOffsetZ;
+			float magnitudeXZ;
+			float chance;
+			for (float x = -centerRadius - MARGIN; x < centerRadius + MARGIN; x++) {
+				for (float z = -centerRadius - MARGIN; z < centerRadius + MARGIN; z++) {
+					centerOffsetX = x + 0.5f;
+					centerOffsetZ = z + 0.5f;
+					// Manhatten distance from the middle edge.
+					magnitudeXZ = Math.abs(centerOffsetX) + Math.abs(centerOffsetZ);
+					chance = 0f;
+					// Falloff
+					chance = 1f - Math.min((magnitudeXZ - centerRadius)/(float)MARGIN, 1f);
+					// Center
+					if (magnitudeXZ <= centerRadius)
+						chance = 1f;
+					if (random.nextFloat() <= chance)
+						structureWorldAccess.setBlockState(middle.add(x, 0, z),
+								net.minecraft.block.Blocks.GRASS_PATH.getDefaultState(), 3);
+				}
+			}
+		}
+		
+		private void generatePath(StructureWorldAccess structureWorldAccess, Random random, BlockPos middle, Direction way) {
+			Direction wayAcross = way.rotateYClockwise();
+			int halfWidth = WIDTH/2;
+			int halfRadius = halfWidth + MARGIN;
+			float chance;
+			// Keep paths parallel.
+			if (wayAcross.getDirection().equals(Direction.AxisDirection.POSITIVE))
+				wayAcross = wayAcross.getOpposite();
+			for (int across = -halfRadius + 1; across <= halfRadius; across++) {
+				// Falloff
+				chance = 1f - (Math.abs(across > 0 ? across : across - 1) - halfWidth)/(float)MARGIN;
+				// Path
+				if (across > -halfWidth && across <= halfWidth)
+					chance = 1f;
+				for (int toward = 1; toward <= LENGTH; toward++) {
+					if (random.nextFloat() <= chance)
+						structureWorldAccess.setBlockState(middle.offset(wayAcross, across).offset(way, toward),
+							net.minecraft.block.Blocks.GRASS_PATH.getDefaultState(), 3);
+				}
 			}
 		}
 	}

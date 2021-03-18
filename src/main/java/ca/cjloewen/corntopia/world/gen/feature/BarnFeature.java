@@ -37,7 +37,8 @@ public class BarnFeature extends StructureFeature<DefaultFeatureConfig> {
 			BlockPos pos = new BlockPos(x, chunkGenerator.getHeight(x, z, Heightmap.Type.WORLD_SURFACE_WG), z);
 			BlockRotation rotation = BlockRotation.random(this.random);
 			BarnGenerator.addPieces(manager, pos, rotation, this.children, this.random);
-			this.setBoundingBoxFromChildren();
+			this.boundingBox = this.children.get(0).getBoundingBox();
+			//this.setBoundingBoxFromChildren();
 		}
 	}
 }

@@ -65,6 +65,7 @@ public class CorntopiaMod implements ModInitializer {
 		Registry.register(Registry.STRUCTURE_PROCESSOR, new Identifier(NAMESPACE, "broken"), BrokenStructureProcessor.BROKEN);
 		// Barn
 		Registry.register(Registry.STRUCTURE_PIECE, new Identifier(NAMESPACE, "barn_base"), StructurePieceType.BARN);
+		Registry.register(Registry.STRUCTURE_PIECE, new Identifier(NAMESPACE, "barn_path"), StructurePieceType.BARN_PATH);
 		FabricStructureBuilder.create(barnId, StructureFeatures.BARN)
 			.step(GenerationStep.Feature.SURFACE_STRUCTURES)
 			.defaultConfig(32, 2, 1404)
