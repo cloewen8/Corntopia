@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.StructureAccessor;
@@ -80,8 +81,27 @@ public class BarnGenerator {
 			else if (toggles[9])
 				pieces.add(new BarnPiece(manager, "lamp_short", pos.add(new BlockPos(3, 3, 8).rotate(rotation)), rotation, true, Blocks.AIR.getDefaultState(), barnType));
 		}
-		if (!barnType.equals(BarnType.BROKEN))
-			pieces.add(new CenterPiece(manager, pos.add(new BlockPos(4, 0, 0).rotate(rotation)), rotation));
+		
+		if (!barnType.equals(BarnType.BROKEN)) {
+			BlockRotation houseRot = getHouseRotation(rotation, random);
+			pieces.add(new CenterPiece(manager, pos.add(new BlockPos(4, 0, 0).rotate(rotation)), rotation, houseRot));
+			// TODO: Generate the house
+		}
+	}
+	
+	private static BlockRotation getHouseRotation(BlockRotation barnRotation, Random random) {
+		EnumSet<BlockRotation> houseRots = EnumSet.allOf(BlockRotation.class);
+		houseRots.remove(barnRotation);
+		int houseI = random.nextInt(houseRots.size());
+		int i = 0;
+		for (BlockRotation houseRot : houseRots) {
+			if (i == houseI) {
+				return houseRot;
+			}
+			i++;
+		}
+		// Let's hope this never happens.
+		throw new IllegalStateException("The laws of mathematics failed!");
 	}
 	
 	public static class BarnPiece extends SimpleStructurePiece {
@@ -175,20 +195,23 @@ public class BarnGenerator {
 		public static final int WIDTH = 4;
 		public static final int MARGIN = 4;
 		
-		private BlockPos pos;
-		private Direction dir;
+		private final BlockPos pos;
+		private final Direction barnDir;
+		private final Direction houseDir;
 		
-		public CenterPiece(StructureManager structureManager, BlockPos pos, BlockRotation rotation) {
+		public CenterPiece(StructureManager structureManager, BlockPos pos, BlockRotation rotation, BlockRotation houseRotation) {
 			super(StructurePieceType.BARN_PATH, 0);
 			this.pos = pos;
-			this.dir = rotation.rotate(Direction.NORTH);
+			this.barnDir = rotation.rotate(Direction.NORTH);
+			this.houseDir = houseRotation.rotate(Direction.NORTH);
 			calculateBoundingBox();
 		}
 
 		public CenterPiece(StructureManager structureManager, CompoundTag compoundTag) {
 			super(StructurePieceType.BARN_PATH, compoundTag);
 			this.pos = new BlockPos(compoundTag.getInt("TPX"), compoundTag.getInt("TPY"), compoundTag.getInt("TPZ"));
-			this.dir = Direction.byId(compoundTag.getInt("Direction"));
+			this.barnDir = Direction.byId(compoundTag.getInt("Direction"));
+			this.houseDir = Direction.byId(compoundTag.getInt("HouseDirection"));
 			calculateBoundingBox();
 		}
 		
@@ -197,7 +220,7 @@ public class BarnGenerator {
 			int acrossOffset = ENTRANCE_WIDTH/2 - diameter/2;
 			BlockBox blockBox = new BlockBox(0, 0, 0, diameter, 1, diameter);
 			blockBox.move(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-			blockBox.move(this.dir.rotateYClockwise().getOffsetX()*acrossOffset, 0, this.dir.rotateYClockwise().getOffsetZ()*acrossOffset);
+			blockBox.move(this.barnDir.rotateYClockwise().getOffsetX()*acrossOffset, 0, this.barnDir.rotateYClockwise().getOffsetZ()*acrossOffset);
 			this.boundingBox = blockBox;
 		}
 
@@ -206,37 +229,31 @@ public class BarnGenerator {
 			tag.putInt("TPX", this.pos.getX());
 		    tag.putInt("TPY", this.pos.getY());
 		    tag.putInt("TPZ", this.pos.getZ());
-		    tag.putInt("Direction", this.dir.getId());
+		    tag.putInt("Direction", this.barnDir.getId());
+		    tag.putInt("HouseDirection", this.houseDir.getId());
 		}
 
 		@Override
 		public boolean generate(StructureWorldAccess structureWorldAccess, StructureAccessor structureAccessor,
 				ChunkGenerator chunkGenerator, Random random, BlockBox boundingBox, ChunkPos chunkPos,
 				BlockPos blockPos) {
-			Direction across = this.dir.rotateYClockwise();
+			Direction across = this.barnDir.rotateYClockwise();
 			int acrossI = ENTRANCE_WIDTH/2;
 			// Fixes parallel offset.
 			if (across.getDirection().equals(Direction.AxisDirection.NEGATIVE))
 				acrossI--;
-			BlockPos middle = this.pos.offset(this.dir, LENGTH).offset(across, acrossI);
-			Direction barnDir = this.dir.getOpposite();
-			EnumSet<Direction> outDirs = EnumSet.allOf(Direction.class);
-			// Filter possible out dirs.
-			outDirs.remove(barnDir);
-			outDirs.removeIf((dir) -> dir.getAxis().equals(Direction.Axis.Y));
+			BlockPos middle = this.pos.offset(this.barnDir, LENGTH).offset(across, acrossI);
 			// Generate the path.
 			generateCenter(structureWorldAccess, random, middle);
-			generatePath(structureWorldAccess, random, middle, barnDir);
-			int houseI = random.nextInt(outDirs.size());
-			int outI = 0;
-			for (Direction outWay : outDirs) {
-				if (outI == houseI) {
-					generatePath(structureWorldAccess, random, middle, outWay);
-					break;
-				}
-				outI++;
-			}
+			generatePath(structureWorldAccess, random, middle, this.barnDir.getOpposite());
+			generatePath(structureWorldAccess, random, middle, this.houseDir.getOpposite());
 			return true;
+		}
+		
+		private void generateBlock(StructureWorldAccess structureWorldAccess, BlockPos pos) {
+			int y = structureWorldAccess.getTopY(Heightmap.Type.WORLD_SURFACE_WG, pos.getX(), pos.getZ()) - 1;
+			structureWorldAccess.setBlockState(new BlockPos(pos.getX(), y, pos.getZ()),
+				net.minecraft.block.Blocks.GRASS_PATH.getDefaultState(), 3);
 		}
 		
 		private void generateCenter(StructureWorldAccess structureWorldAccess, Random random, BlockPos middle) {
@@ -258,8 +275,7 @@ public class BarnGenerator {
 					if (magnitudeXZ <= centerRadius)
 						chance = 1f;
 					if (random.nextFloat() <= chance)
-						structureWorldAccess.setBlockState(middle.add(x, 0, z),
-								net.minecraft.block.Blocks.GRASS_PATH.getDefaultState(), 3);
+						generateBlock(structureWorldAccess, middle.add(x, 0, z));
 				}
 			}
 		}
@@ -280,10 +296,13 @@ public class BarnGenerator {
 					chance = 1f;
 				for (int toward = 1; toward <= LENGTH; toward++) {
 					if (random.nextFloat() <= chance)
-						structureWorldAccess.setBlockState(middle.offset(wayAcross, across).offset(way, toward),
-							net.minecraft.block.Blocks.GRASS_PATH.getDefaultState(), 3);
+						generateBlock(structureWorldAccess, middle.offset(wayAcross, across).offset(way, toward));
 				}
 			}
 		}
 	}
+	
+	//public static class HousePiece extends StructurePiece {
+	//	
+	//}
 }
