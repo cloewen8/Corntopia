@@ -3,9 +3,6 @@ package ca.cjloewen.corntopia;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import ca.cjloewen.corntopia.mixin.SignTypeMixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -66,7 +63,6 @@ public class BuildingBlocks {
 		}
 	}
 	
-	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
 	// Blocks
 	public static final Map<String, Block> BLOCKS = new HashMap<>();
 	public static final Map<String, Block> STAIRS_BLOCKS = new HashMap<>();
@@ -821,13 +817,13 @@ public class BuildingBlocks {
 			STAIRS_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_stairs"), registerFlammable(stairs, material)));
 			STAIRS_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_stairs"), createBuildingBlockItem(stairs)));
 		} else if (planks == null)
-			LOGGER.warn("Stairs was not made for the %s building block type (missing Planks).", name);
+			CorntopiaMod.LOGGER.warn("Stairs was not made for the %s building block type (missing Planks).", name);
 		if (!ExcludeMask.PRESSURE_PLATE.contains(exclude) && planks != null) {
 			pressurePlate = createPressurePlate(planks);
 			PRESSURE_PLATE_BLOCKS.put(name, Registry.register(Registry.BLOCK, new Identifier(CorntopiaMod.NAMESPACE, name + "_pressure_plate"), pressurePlate));
 			PRESSURE_PLATE_ITEMS.put(name, Registry.register(Registry.ITEM, new Identifier(CorntopiaMod.NAMESPACE, name + "_pressure_plate"), createRedstoneBlockItem(pressurePlate)));
 		} else if (planks == null)
-			LOGGER.warn("A pressure plate was not made for the %s building block type (missing Planks).", name);
+			CorntopiaMod.LOGGER.warn("A pressure plate was not made for the %s building block type (missing Planks).", name);
 		if (!ExcludeMask.SIGN.contains(exclude)) {
 			// FIXME: Signs don't render when placed. Guessing it is a problem with the sign entity type (needs further research).
 			signType = new CustomSignType(name);

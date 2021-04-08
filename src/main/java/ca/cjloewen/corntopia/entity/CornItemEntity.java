@@ -1,8 +1,5 @@
 package ca.cjloewen.corntopia.entity;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import ca.cjloewen.corntopia.CorntopiaMod;
 import ca.cjloewen.corntopia.item.Items;
 import ca.cjloewen.corntopia.mixin.IItemEntityMixin;
@@ -20,7 +17,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 
 public class CornItemEntity extends ItemEntity {
-	private static final Logger LOGGER = LogManager.getLogger("Corntopia");
 	public static final Identifier STAT = new Identifier(CorntopiaMod.NAMESPACE, "corn_popped");
 	private double explosionX;
 	private double explosionY;
@@ -54,7 +50,7 @@ public class CornItemEntity extends ItemEntity {
 				double spawnAmount = Math.min(Math.ceil(amount*0.16d), 8d)*getStack().getCount();
 				World world = getEntityWorld();
 				ItemEntity popcorn;
-				LOGGER.info("Spawning " + spawnAmount + " popcorn!");
+				CorntopiaMod.LOGGER.info("Spawning " + spawnAmount + " popcorn!");
 				if (source instanceof EntityDamageSource) {
 					Entity entity = ((EntityDamageSource)source).getAttacker();
 					if (entity instanceof PlayerEntity)
